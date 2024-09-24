@@ -6,24 +6,50 @@ const LoginForm = ({ setUser, onLoginSuccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // Adicionado para controle de carregamento
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setLoading(true); // Inicia o carregamento
+
     axios.post('http://127.0.0.1:8000/api/login/', { username, password })
       .then(response => {
-        // Armazenar o token e usuário
-        setUser(response.data.user);
-        localStorage.setItem('token', response.data.token);
-        onLoginSuccess();
+        const { access, refresh, user_id, username: userUsername, empresas } = response.data;
 
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + 1); // Adiciona 1 dia
-      localStorage.setItem('tokenExpiration', expirationDate.toISOString());
+        setUser({
+          id: user_id,
+          username: userUsername,
+          empresas: empresas, // Se for uma lista, considere como vai utilizar
+        });
+
+        localStorage.setItem('token', access);
+        localStorage.setItem('refreshToken', refresh);
+        localStorage.setItem('userId', user_id);
+        localStorage.setItem('username', userUsername);
+        localStorage.setItem('userEmpresaId', JSON.stringify(empresas)); // Serializa empresas
+
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 1);
+        localStorage.setItem('tokenExpiration', expirationDate.toISOString());
+
+        onLoginSuccess();
       })
       .catch(error => {
         console.error('Erro ao fazer login:', error);
-        setError('Credenciais inválidas. Tente novamente.'); // Define a mensagem de erro
+        if (error.response && error.response.data) {
+          setError(error.response.data.detail || 'Credenciais inválidas. Tente novamente.');
+        } else {
+          setError('Erro na conexão com o servidor. Tente novamente mais tarde.');
+        }
+      })
+      .finally(() => {
+        setLoading(false); // Termina o carregamento
       });
+  };
+
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -47,17 +73,28 @@ const LoginForm = ({ setUser, onLoginSuccess }) => {
             </div>
             <div className="mb-3">
               <label htmlFor="password" className="form-label">Senha</label>
-              <input
-                type="password"
-                className="form-control"
-                id="password"
-                placeholder="Senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="input-group">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  className="form-control"
+                  id="password"
+                  placeholder="Senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={toggleShowPassword}
+                >
+                  {showPassword ? 'Ocultar' : 'Mostrar'}
+                </button>
+              </div>
             </div>
-            <button type="submit" className="btn btn-primary w-100">Login</button>
+            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+              {loading ? 'Carregando...' : 'Login'}
+            </button>
           </form>
         </div>
       </div>

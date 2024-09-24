@@ -11,27 +11,22 @@ import "../src/App.css";
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('login');
+  const [user, setUser] = useState(null); // Estado para armazenar o usuário logado
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const [selectedOperation, setSelectedOperation] = useState(null);
-  const [user, setUser] = useState(null); // Para armazenar o usuário logado
 
+  // Verifica se o usuário já está logado ao carregar a página
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const tokenExpiration = localStorage.getItem('tokenExpiration');
-
-    if (token && tokenExpiration) {
-      const expirationDate = new Date(tokenExpiration);
-      const now = new Date();
-
-      if (now < expirationDate) {
-        setUser(token); // Ou, se preferir, use o usuário do localStorage
-        setCurrentPage('ticketsView'); // Muda para a página inicial se o token for válido
-      } else {
-        localStorage.removeItem('token');
-        localStorage.removeItem('tokenExpiration');
-      }
+    if (token) {
+      setUser({}); // Considera o usuário logado se houver um token
+      setCurrentPage('ticketsView'); // Vai direto para a página inicial
     }
   }, []);
+
+  const onLoginSuccess = () => {
+    setCurrentPage('ticketsView'); // Redireciona para a página inicial
+  };
 
   const renderPage = () => {
     switch (currentPage) {
@@ -48,13 +43,13 @@ const App = () => {
       case 'ticketPrint':
         return <TicketPrint ticketId={selectedTicketId} />;
       default:
-        return <LoginForm setCurrentPage={setCurrentPage} setUser={setUser} />;
+        return <LoginForm setUser={setUser} onLoginSuccess={onLoginSuccess} />;
     }
   };
 
   return (
     <div>
-      {currentPage !== 'login' && <Navigation setCurrentPage={setCurrentPage} />}
+      {user && currentPage !== 'login' && <Navigation setCurrentPage={setCurrentPage} />} {/* Navigation renderizado fora do switch */}
       <div className="container">
         {renderPage()}
       </div>

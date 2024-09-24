@@ -4,6 +4,7 @@ import './css/TicketsForm.css';
 
 const TicketForm = ({ user }) => {
   const [placa, setPlaca] = useState('');
+  const [produto, setProduto] = useState('');
   const [transportadora, setTransportadora] = useState('');
   const [motorista, setMotorista] = useState('');
   const [operador, setOperador] = useState('');
@@ -15,9 +16,23 @@ const TicketForm = ({ user }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const token = localStorage.getItem('token');
-    axios.post('http://127.0.0.1:8000/api/tickets/', {
+    const empresaIDs = user.empresas.map(empresa => empresa.id); // Mapeia os IDs das empresas
+
+    if (!token) {
+      console.error('Usuário não está autenticado');
+      return;
+    }
+
+    if (!user || !user.id) {
+      console.error('Usuário não está definido corretamente');
+      return;
+    }
+
+    const ticketData = {
       placa,
+      produto,
       transportadora,
       motorista,
       operador,
@@ -27,16 +42,22 @@ const TicketForm = ({ user }) => {
       peso_liquido: pesoLiquido,
       lote_leira: loteLeira,
       ticket_cancelado: false,
-      usuario: user.id, // Passa o usuário logado
-    }, {
+      usuario: user.id,
+      operacao: empresaIDs // Envia os IDs das operações
+    };
+
+    axios.post('http://127.0.0.1:8000/api/tickets/', ticketData, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
     .then(response => {
-      console.log('Ticket criado:', response.data);
+      console.log('Ticket criado com sucesso:', response.data);
+      // Adicione um redirecionamento ou notificação de sucesso aqui
     })
-    .catch(error => console.error('Erro ao criar ticket:', error));
+    .catch(error => {
+      console.error('Erro ao criar o ticket:', error);
+    });
   };
 
   const handlePesoEntradaChange = (value) => {
@@ -51,38 +72,111 @@ const TicketForm = ({ user }) => {
 
   return (
     <div>
-      <h2 align="center">Gerar Ticket</h2>
+      <h2 align="center">Gerar Ticket</h2><br />
       <div className='form-container'>
-      <form className='form-control ' onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div className=' mb-2'>
-      <input className='form-control' type="text" placeholder="Placa" value={placa} onChange={(e) => setPlaca(e.target.value)} />
-      </div>
-      <div className='mb-2'>
-      <input className='form-control' type="text" placeholder="Transportadora" value={transportadora} onChange={(e) => setTransportadora(e.target.value)} />
-      </div>
-      <div className='mb-2'>
-      <input className='form-control' type="text" placeholder="Motorista" value={motorista} onChange={(e) => setMotorista(e.target.value)} />
-      </div>
-      <div className='mb-2'>
-      <input className='form-control' type="text" placeholder="Operador" value={operador} onChange={(e) => setOperador(e.target.value)} />
-      </div>
-      <div className='mb-2'>
-      <input className='form-control' type="text" placeholder="Cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} />
-      </div>
-      <div className='mb-2'>
-      <input className='form-control' type="number" placeholder="Peso de Entrada" value={pesoEntrada} onChange={(e) => handlePesoEntradaChange(parseFloat(e.target.value))} />
-      </div>
-      <div className='mb-2'>
-      <input className='form-control' type="number" placeholder="Peso de Saída" value={pesoSaida} onChange={(e) => handlePesoSaidaChange(parseFloat(e.target.value))} />
-      </div>
-      <div className='mb-2'>
-      <input className='form-control' type="number" placeholder="Peso Líquido" value={pesoLiquido} readOnly />
-      </div>
-      <div className=' mb-2'>
-      <input className='form-control' type="text" placeholder="Lote Leira" value={loteLeira} onChange={(e) => setLoteLeira(e.target.value)} />
-      </div>
-      <button className='btn btn-primary' type="submit">Salvar Ticket</button>
-      </form>
+        <form className='form-control' onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div className='mb-2'>
+            <input
+              className='form-control'
+              type="text"
+              placeholder="Placa"
+              value={placa}
+              onChange={(e) => setPlaca(e.target.value)}
+              required
+            />
+          </div>
+          <div className='mb-2'>
+            <input
+              className='form-control'
+              type="text"
+              placeholder="Produto"
+              value={produto}
+              onChange={(e) => setProduto(e.target.value)}
+              required
+            />
+          </div>
+          <div className='mb-2'>
+            <input
+              className='form-control'
+              type="text"
+              placeholder="Transportadora"
+              value={transportadora}
+              onChange={(e) => setTransportadora(e.target.value)}
+              required
+            />
+          </div>
+          <div className='mb-2'>
+            <input
+              className='form-control'
+              type="text"
+              placeholder="Motorista"
+              value={motorista}
+              onChange={(e) => setMotorista(e.target.value)}
+              required
+            />
+          </div>
+          <div className='mb-2'>
+            <input
+              className='form-control'
+              type="text"
+              placeholder="Operador"
+              value={operador}
+              onChange={(e) => setOperador(e.target.value)}
+            />
+          </div>
+          <div className='mb-2'>
+            <input
+              className='form-control'
+              type="text"
+              placeholder="Cliente"
+              value={cliente}
+              onChange={(e) => setCliente(e.target.value)}
+              required
+            />
+          </div>
+          <div className='mb-2'>
+            Peso de Entrada
+            <input
+              className='form-control'
+              type="number"
+              placeholder="Peso de Entrada"
+              value={pesoEntrada}
+              onChange={(e) => handlePesoEntradaChange(parseFloat(e.target.value))}
+              required
+            />
+          </div>
+          <div className='mb-2'>
+            Peso de Saída
+            <input
+              className='form-control'
+              type="number"
+              placeholder="Peso de Saída"
+              value={pesoSaida}
+              onChange={(e) => handlePesoSaidaChange(parseFloat(e.target.value))}
+              required
+            />
+          </div>
+          <div className='mb-2'>
+            Peso Líquido
+            <input
+              className='form-control'
+              type="number"
+              placeholder="Peso Líquido"
+              value={pesoLiquido}
+              readOnly
+            />
+          </div>
+          <div className='mb-2'>
+            <input
+              className='form-control'
+              type="text"
+              placeholder="Lote Leira"
+              value={loteLeira}
+              onChange={(e) => setLoteLeira(e.target.value)}
+            />
+          </div>
+          <button className='btn btn-primary' type="submit">Salvar Ticket</button>
+        </form>
       </div>
     </div>
   );

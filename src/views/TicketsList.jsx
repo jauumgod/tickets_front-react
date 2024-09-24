@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './css/TicketsList.css'; // Importação do arquivo CSS
+import Navigation from '../components/Navigation';
 
 const TicketsViewAPI = () => {
   const [tickets, setTickets] = useState([]);  
@@ -31,7 +32,8 @@ const TicketsViewAPI = () => {
   }, []);
 
   return (
-    <div className="main-content">
+<div>
+<div className="main-content">
       <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet"></link>
 
       <div className="container mt-7">
@@ -97,7 +99,7 @@ const TicketsViewAPI = () => {
                       <th scope="col">Sequência</th>
                       <th scope="col">Operação</th>
                       <th scope="col">Placa</th>
-                      <th scope="col">Peso</th>
+                      <th scope="col">Peso Líquido</th>
                       <th scope="col">Data de Criação</th>
                     </tr>
                   </thead>
@@ -172,6 +174,7 @@ const TicketsViewAPI = () => {
         }
       `}</style>
     </div>
+</div>
   );
 };
 
