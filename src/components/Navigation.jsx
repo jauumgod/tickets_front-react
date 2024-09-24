@@ -13,7 +13,7 @@ const Navigation = ({ setCurrentPage }) => {
       localStorage.removeItem('username'); // Remover o username ao deslogar
       setCurrentPage('login'); // Redireciona para a página de login
       console.log('Usuário saiu');
-    }, 3000); // Aguarda 5 segundos antes de efetuar o logout
+    }, 2000); 
   };
 
   return (

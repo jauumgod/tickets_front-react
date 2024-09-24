@@ -18,7 +18,9 @@ const TicketForm = ({ user }) => {
     e.preventDefault();
 
     const token = localStorage.getItem('token');
-    const empresaIDs = user.empresas.map(empresa => empresa.id); // Mapeia os IDs das empresas
+    const userID = localStorage.getItem('userId')
+    const empresaID = localStorage.getItem('userEmpresaId');
+
 
     if (!token) {
       console.error('Usuário não está autenticado');
@@ -27,6 +29,10 @@ const TicketForm = ({ user }) => {
 
     if (!user || !user.id) {
       console.error('Usuário não está definido corretamente');
+      return;
+    }
+    if (!empresaID) {
+      console.error('ID da empresa não encontrado');
       return;
     }
 
@@ -42,8 +48,8 @@ const TicketForm = ({ user }) => {
       peso_liquido: pesoLiquido,
       lote_leira: loteLeira,
       ticket_cancelado: false,
-      usuario: user.id,
-      operacao: empresaIDs // Envia os IDs das operações
+      usuario: userID,
+      operacao: empresaID
     };
 
     axios.post('http://127.0.0.1:8000/api/tickets/', ticketData, {
@@ -80,6 +86,7 @@ const TicketForm = ({ user }) => {
               className='form-control'
               type="text"
               placeholder="Placa"
+              maxLength={8}
               value={placa}
               onChange={(e) => setPlaca(e.target.value)}
               required

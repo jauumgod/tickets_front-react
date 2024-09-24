@@ -22,12 +22,15 @@ const LoginForm = ({ setUser, onLoginSuccess }) => {
           username: userUsername,
           empresas: empresas, // Se for uma lista, considere como vai utilizar
         });
+        console.log(response);
+        const userID = user_id[0];
+        const empresaID = empresas[0];
 
         localStorage.setItem('token', access);
         localStorage.setItem('refreshToken', refresh);
-        localStorage.setItem('userId', user_id);
+        localStorage.setItem('userId', userID);
         localStorage.setItem('username', userUsername);
-        localStorage.setItem('userEmpresaId', JSON.stringify(empresas)); // Serializa empresas
+        localStorage.setItem('userEmpresaId', empresaID);
 
         const expirationDate = new Date();
         expirationDate.setDate(expirationDate.getDate() + 1);
