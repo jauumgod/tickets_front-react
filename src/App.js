@@ -1,35 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navigation from './components/Navigation';
-import TicketsViewAPI from './views/TicketsList'; // Importa suas páginas
+import TicketsViewAPI from './views/TicketsList';
 import TicketsForm from './views/TicketsForm';
+import TicketPrint from './views/TicketPrint';
 import ImpressaoTickets from './views/ImpressaoTickets';
 import Graph from './components/Graph';
 import OperationDetails from './components/OperationDetails';
+import LoginForm from './views/LoginForm';
+import "../src/App.css";
 
 const App = () => {
-  const [currentPage, setCurrentPage] = useState('ticketsView');
-  const [selectedOperation, setSelectedOperation] = useState(null); // Para armazenar os dados da operação
+  const [currentPage, setCurrentPage] = useState('login');
+  const [selectedTicketId, setSelectedTicketId] = useState(null);
+  const [selectedOperation, setSelectedOperation] = useState(null);
+  const [user, setUser] = useState(null); // Para armazenar o usuário logado
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const tokenExpiration = localStorage.getItem('tokenExpiration');
+
+    if (token && tokenExpiration) {
+      const expirationDate = new Date(tokenExpiration);
+      const now = new Date();
+
+      if (now < expirationDate) {
+        setUser(token); // Ou, se preferir, use o usuário do localStorage
+        setCurrentPage('ticketsView'); // Muda para a página inicial se o token for válido
+      } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('tokenExpiration');
+      }
+    }
+  }, []);
 
   const renderPage = () => {
     switch (currentPage) {
       case 'ticketsView':
-        return <TicketsViewAPI />;
+        return <TicketsViewAPI setCurrentPage={setCurrentPage} setSelectedTicketId={setSelectedTicketId} />;
       case 'ticketsForm':
         return <TicketsForm />;
       case 'impressaoTickets':
-        return <ImpressaoTickets />;
+        return <ImpressaoTickets setCurrentPage={setCurrentPage} setSelectedTicketId={setSelectedTicketId} />;
       case 'graphPesoLiquido':
-        return <Graph setCurrentPage={setCurrentPage} setSelectedOperation={setSelectedOperation} />; // Passa setSelectedOperation
+        return <Graph setCurrentPage={setCurrentPage} setSelectedOperation={setSelectedOperation} />;
       case 'operationDetails':
-        return <OperationDetails operation={selectedOperation} />; // Exibe os detalhes da operação
+        return <OperationDetails operation={selectedOperation} />;
+      case 'ticketPrint':
+        return <TicketPrint ticketId={selectedTicketId} />;
       default:
-        return <TicketsViewAPI />; // Página padrão
+        return <LoginForm setCurrentPage={setCurrentPage} setUser={setUser} />;
     }
   };
 
   return (
     <div>
-      <Navigation setCurrentPage={setCurrentPage} />
+      {currentPage !== 'login' && <Navigation setCurrentPage={setCurrentPage} />}
       <div className="container">
         {renderPage()}
       </div>

@@ -97,6 +97,7 @@ const TicketsViewAPI = () => {
                       <th scope="col">Sequência</th>
                       <th scope="col">Operação</th>
                       <th scope="col">Placa</th>
+                      <th scope="col">Peso</th>
                       <th scope="col">Data de Criação</th>
                     </tr>
                   </thead>
@@ -107,6 +108,7 @@ const TicketsViewAPI = () => {
                         <td>{ticket.sequencia}</td>
                         <td>{ticket.operacao.nome}</td>
                         <td>{ticket.placa}</td>
+                        <td>{ticket.peso_liquido}</td>
                         <td>{ticket.criacao}</td>
                       </tr>
                     ))}
