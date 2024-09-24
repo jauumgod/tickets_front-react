@@ -22,9 +22,9 @@ const LoginForm = ({ setUser, onLoginSuccess }) => {
           username: userUsername,
           empresas: empresas, // Se for uma lista, considere como vai utilizar
         });
-        console.log(response);
-        const userID = user_id[0];
+        const userID = user_id;
         const empresaID = empresas[0];
+        console.log(userID);
 
         localStorage.setItem('token', access);
         localStorage.setItem('refreshToken', refresh);
