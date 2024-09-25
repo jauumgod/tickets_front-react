@@ -43,8 +43,26 @@ const getTicketById = (ticketId) => {
     },
   });
 };
+
+// Função para buscar usuários
 const getUsers = () => {
   const url = `${API_URL}/users/`; // Altere a URL de acordo com a sua API
+
+  const token = authService.getToken();
+  if (!token) {
+    return Promise.reject(new Error('Usuário não está autenticado'));
+  }
+
+  return axios.get(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+// Função para buscar empresas
+const getEmpresas = () => {
+  const url = `${API_URL}/empresas/`; // Altere a URL de acordo com a sua API
 
   const token = authService.getToken();
   if (!token) {
@@ -62,6 +80,7 @@ const apiService = {
   getTickets,
   getTicketById, // Adiciona a função para buscar ticket por ID
   getUsers,
+  getEmpresas, // Adiciona a função para buscar empresas
 };
 
 export default apiService;

@@ -8,9 +8,11 @@ const TicketsViewAPI = () => {
   const [operacao, setOperacao] = useState('');  
   const [sequencia, setSequencia] = useState('');  
   const [criacao, setCriacao] = useState('');  
+  const [currentPage, setCurrentPage] = useState(1); // Página atual
+  const [totalTickets, setTotalTickets] = useState(0); // Total de tickets
 
   const fetchTickets = () => {
-    let url = 'http://127.0.0.1:8000/api/tickets/';
+    let url = `http://127.0.0.1:8000/api/tickets/?page=${currentPage}&limit=5`; // Adicionando parâmetros de paginação
     const params = [];
     
     if (operacao) params.push(`operacao=${operacao}`);
@@ -18,7 +20,7 @@ const TicketsViewAPI = () => {
     if (criacao) params.push(`criacao=${criacao}`);
     
     if (params.length > 0) {
-      url += '?' + params.join('&');
+      url += '&' + params.join('&');
     }
 
     const token = localStorage.getItem('token');
@@ -34,13 +36,18 @@ const TicketsViewAPI = () => {
         Authorization: `Bearer ${token}`,
       }
     })
-      .then(response => setTickets(response.data))
+      .then(response => {
+        setTickets(response.data.results); // Assumindo que a resposta contém uma lista de tickets
+        setTotalTickets(response.data.count); // Supondo que a API retorna o total de tickets
+      })
       .catch(error => console.error('Erro ao buscar os tickets:', error));
   };
 
   useEffect(() => {
     fetchTickets();
-  }, []);
+  }, [currentPage, operacao, sequencia, criacao]); // Refaz a busca sempre que a página atual ou filtros mudarem
+
+  const totalPages = Math.ceil(totalTickets / 5); // Calcular o total de páginas
 
   return (
     <div>
@@ -112,8 +119,8 @@ const TicketsViewAPI = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {tickets.map((ticket, index) => (
-                        <tr key={index}>
+                      {tickets.map((ticket) => (
+                        <tr key={ticket.id}>
                           <td>{ticket.id}</td>
                           <td>{ticket.sequencia}</td>
                           <td>{ticket.empresa.nome}</td>
@@ -128,21 +135,19 @@ const TicketsViewAPI = () => {
                 <div className="card-footer py-4">
                   <nav aria-label="...">
                     <ul className="pagination justify-content-end mb-0">
-                      <li className="page-item disabled">
-                        <a className="page-link" href="#" tabIndex="-1">
+                      <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                        <a className="page-link" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}>
                           <i className="fas fa-angle-left"></i>
                           <span className="sr-only">Previous</span>
                         </a>
                       </li>
-                      <li className="page-item active">
-                        <a className="page-link" href="#">1</a>
-                      </li>
-                      <li className="page-item">
-                        <a className="page-link" href="#">2 <span className="sr-only">(current)</span></a>
-                      </li>
-                      <li className="page-item"><a className="page-link" href="#">3</a></li>
-                      <li className="page-item">
-                        <a className="page-link" href="#">
+                      {[...Array(totalPages)].map((_, index) => (
+                        <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                          <a className="page-link" onClick={() => setCurrentPage(index + 1)}>{index + 1}</a>
+                        </li>
+                      ))}
+                      <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                        <a className="page-link" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}>
                           <i className="fas fa-angle-right"></i>
                           <span className="sr-only">Next</span>
                         </a>

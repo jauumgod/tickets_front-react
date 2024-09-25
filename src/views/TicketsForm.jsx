@@ -13,13 +13,12 @@ const TicketForm = () => {
   const [pesoSaida, setPesoSaida] = useState(0);
   const [pesoLiquido, setPesoLiquido] = useState(0);
   const [loteLeira, setLoteLeira] = useState('');
+  const [successMessage, setSuccessMessage] = useState(''); // Estado para mensagem de sucesso
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     const token = localStorage.getItem('token');
-    console.log(token);
-
     if (!token) {
       console.error('Usuário não está autenticado');
       return;
@@ -46,6 +45,13 @@ const TicketForm = () => {
     })
     .then(response => {
       console.log('Ticket criado com sucesso:', response.data);
+      setSuccessMessage('Ticket criado com sucesso!'); // Define a mensagem de sucesso
+
+      // Redireciona após 2 segundos
+      setTimeout(() => {
+        setSuccessMessage(''); // Limpa a mensagem após 2 segundos
+        window.location.reload(); // Atualiza a página
+      }, 2000);
       
     })
     .catch(error => {
@@ -55,7 +61,6 @@ const TicketForm = () => {
         console.error('Erro ao criar o ticket:', error);
       }
     });
-    
   };
 
   const handlePesoEntradaChange = (value) => {
@@ -67,8 +72,6 @@ const TicketForm = () => {
     setPesoSaida(value);
     setPesoLiquido(pesoEntrada - value);
   };
-
-
 
 
   return (
@@ -179,6 +182,7 @@ const TicketForm = () => {
           </div>
           <button className='btn btn-primary' type="submit">Salvar Ticket</button>
         </form>
+        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>} {/* Mensagem de sucesso */}
       </div>
     </div>
   );

@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import API_BASE_URL from '../config/apiConfig';
+import apiService from '../services/apiService'; // Importando a apiService
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const Graph = ({ setCurrentPage, setSelectedOperation }) => {
   const [data, setData] = useState([]);
 
   const fetchTickets = () => {
-    axios.get(API_BASE_URL + 'tickets/')
+    apiService.getTickets() // Usando a apiService para buscar tickets
       .then(response => {
         const tickets = response.data;
         const aggregatedData = aggregateData(tickets);
@@ -47,7 +46,6 @@ const Graph = ({ setCurrentPage, setSelectedOperation }) => {
     setCurrentPage('operationDetails'); // Muda para a página de detalhes
   };
   
-
   return (
     <div>
       <h2 align="center">Relatório de Saídas</h2>
