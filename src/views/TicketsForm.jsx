@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './css/TicketsForm.css';
 
-const TicketForm = ({ user }) => {
+const TicketForm = () => {
   const [placa, setPlaca] = useState('');
   const [produto, setProduto] = useState('');
   const [transportadora, setTransportadora] = useState('');
@@ -18,21 +18,10 @@ const TicketForm = ({ user }) => {
     e.preventDefault();
 
     const token = localStorage.getItem('token');
-    const userID = localStorage.getItem('userId')
-    const empresaID = localStorage.getItem('userEmpresaId');
-
+    console.log(token);
 
     if (!token) {
       console.error('Usuário não está autenticado');
-      return;
-    }
-
-    if (!user || !user.id) {
-      console.error('Usuário não está definido corretamente');
-      return;
-    }
-    if (!empresaID) {
-      console.error('ID da empresa não encontrado');
       return;
     }
 
@@ -48,8 +37,6 @@ const TicketForm = ({ user }) => {
       peso_liquido: pesoLiquido,
       lote_leira: loteLeira,
       ticket_cancelado: false,
-      usuario: userID,
-      operacao: empresaID
     };
 
     axios.post('http://127.0.0.1:8000/api/tickets/', ticketData, {
@@ -59,11 +46,16 @@ const TicketForm = ({ user }) => {
     })
     .then(response => {
       console.log('Ticket criado com sucesso:', response.data);
-      // Adicione um redirecionamento ou notificação de sucesso aqui
+      
     })
     .catch(error => {
-      console.error('Erro ao criar o ticket:', error);
+      if (error.response) {
+        console.error('Erro ao criar o ticket:', error.response.data);
+      } else {
+        console.error('Erro ao criar o ticket:', error);
+      }
     });
+    
   };
 
   const handlePesoEntradaChange = (value) => {
@@ -75,6 +67,9 @@ const TicketForm = ({ user }) => {
     setPesoSaida(value);
     setPesoLiquido(pesoEntrada - value);
   };
+
+
+
 
   return (
     <div>

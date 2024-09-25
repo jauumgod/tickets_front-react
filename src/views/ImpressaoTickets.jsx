@@ -1,31 +1,24 @@
 // src/views/ImpressaoTickets.js
 
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import apiService from '../services/apiService';
 import './css/TicketsList.css';
 
 const ImpressaoTickets = ({ setCurrentPage, setSelectedTicketId }) => {
-  const [tickets, setTickets] = useState([]);  
-  const [showModal, setShowModal] = useState(false);  
-  const [operacao, setOperacao] = useState('');  
-  const [sequencia, setSequencia] = useState('');  
-  const [criacao, setCriacao] = useState('');  
+  const [tickets, setTickets] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [operacao, setOperacao] = useState('');
+  const [sequencia, setSequencia] = useState('');
+  const [criacao, setCriacao] = useState('');
 
   const fetchTickets = () => {
-    let url = 'http://127.0.0.1:8000/api/tickets/';
-    const params = [];
-    
-    if (operacao) params.push(`operacao=${operacao}`);
-    if (sequencia) params.push(`sequencia=${sequencia}`);
-    if (criacao) params.push(`criacao=${criacao}`);
-    
-    if (params.length > 0) {
-      url += '?' + params.join('&');
-    }
-
-    axios.get(url)
-      .then(response => setTickets(response.data))
-      .catch(error => console.error('Erro ao buscar os tickets:', error));
+    apiService.getTickets(operacao, sequencia, criacao)
+      .then(response => {
+        setTickets(response.data);
+      })
+      .catch(error => {
+        console.error('Erro ao buscar os tickets:', error.message);
+      });
   };
 
   useEffect(() => {
@@ -75,7 +68,7 @@ const ImpressaoTickets = ({ setCurrentPage, setSelectedTicketId }) => {
             </div>
           </div>
         )}
-        <div className="row">     
+        <div className="row">
           <div className="col">
             <div className="card shadow">
               <div className="card-header border-0">
@@ -99,7 +92,7 @@ const ImpressaoTickets = ({ setCurrentPage, setSelectedTicketId }) => {
                     {tickets.map((ticket, index) => (
                       <tr key={index}>
                         <td>{ticket.sequencia}</td>
-                        <td>{ticket.operacao.nome}</td>
+                        <td>{ticket.empresa.nome}</td>
                         <td>{ticket.peso_liquido}</td>
                         <td>{ticket.criacao}</td>
                         <td>

@@ -8,6 +8,7 @@ import Graph from './components/Graph';
 import OperationDetails from './components/OperationDetails';
 import LoginForm from './views/LoginForm';
 import "../src/App.css";
+import PainelGerencial from './views/PainelGerencial';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('login');
@@ -42,6 +43,8 @@ const App = () => {
         return <OperationDetails operation={selectedOperation} />;
       case 'ticketPrint':
         return <TicketPrint ticketId={selectedTicketId} />;
+      case 'painelGerencial':
+        return<PainelGerencial/>
       default:
         return <LoginForm setUser={setUser} onLoginSuccess={onLoginSuccess} />;
     }

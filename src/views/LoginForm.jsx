@@ -1,54 +1,26 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import authService from '../services/authService';
 
 const LoginForm = ({ setUser, onLoginSuccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // Adicionado para controle de carregamento
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Inicia o carregamento
+    setLoading(true);
 
-    axios.post('http://127.0.0.1:8000/api/login/', { username, password })
-      .then(response => {
-        const { access, refresh, user_id, username: userUsername, empresas } = response.data;
-
-        setUser({
-          id: user_id,
-          username: userUsername,
-          empresas: empresas, // Se for uma lista, considere como vai utilizar
-        });
-        const userID = user_id;
-        const empresaID = empresas[0];
-        console.log(userID);
-
-        localStorage.setItem('token', access);
-        localStorage.setItem('refreshToken', refresh);
-        localStorage.setItem('userId', userID);
-        localStorage.setItem('username', userUsername);
-        localStorage.setItem('userEmpresaId', empresaID);
-
-        const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() + 1);
-        localStorage.setItem('tokenExpiration', expirationDate.toISOString());
-
-        onLoginSuccess();
-      })
-      .catch(error => {
-        console.error('Erro ao fazer login:', error);
-        if (error.response && error.response.data) {
-          setError(error.response.data.detail || 'Credenciais inválidas. Tente novamente.');
-        } else {
-          setError('Erro na conexão com o servidor. Tente novamente mais tarde.');
-        }
-      })
-      .finally(() => {
-        setLoading(false); // Termina o carregamento
-      });
+    try {
+      const user = await authService.login(username, password);
+      setUser(user);
+      onLoginSuccess();
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleShowPassword = () => {
