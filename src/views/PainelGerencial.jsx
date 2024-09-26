@@ -1,174 +1,93 @@
+// src/pages/PainelGerencial.jsx
+
 import React, { useEffect, useState } from "react";
 import apiService from "../services/apiService";
-import './css/TicketsList.css';
-import './css/PainelGerencial.css';
+import UserModal from "../components/UserModal"; // Importa o UserModal
+import { Button, Table, Card, Row, Col } from 'react-bootstrap'; // Importa componentes Bootstrap
 
 const PainelGerencial = () => {
   const [usuarios, setUsuarios] = useState([]);
-  const [empresas, setEmpresas] = useState([]); // Estado para armazenar empresas
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
   const [showModal, setShowModal] = useState(false);
-  const [newUser, setNewUser] = useState({ username: '', password: '', empresa: '' }); // Adicionando o campo de senha
 
-  // Função para buscar usuários
-  const fetchUsuarios = () => {
-    apiService.getUsers()
-      .then(response => {
-        setUsuarios(response.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error("Erro ao buscar usuários:", error);
-        setLoading(false);
-      });
+  const fetchUsuarios = async (page = 1) => {
+    setLoading(true);
+    try {
+      const response = await apiService.getUsers(page, limit);
+      setUsuarios(response.data.results || response.data);
+      setTotalPages(Math.ceil(response.data.count / limit));
+    } catch (error) {
+      console.error("Erro ao buscar usuários:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Função para buscar empresas
-  const fetchEmpresas = () => {
-    apiService.getEmpresas()
-      .then(response => {
-        setEmpresas(response.data); // Armazena a lista de empresas
-      })
-      .catch(error => {
-        console.error("Erro ao buscar empresas:", error);
-      });
-  };
-
-  // useEffect para buscar usuários e empresas ao montar o componente
   useEffect(() => {
-    fetchUsuarios();
-    fetchEmpresas();
-  }, []);
+    fetchUsuarios(currentPage);
+  }, [currentPage]);
 
-  // Função para criar um novo usuário
-  const createUser = () => {
-    apiService.createUser(newUser)
-      .then(response => {
-        setUsuarios([...usuarios, response.data]);
-        setShowModal(false);
-        setNewUser({ username: '', password: '', empresa: '' }); // Resetando os campos
-      })
-      .catch(error => {
-        console.error("Erro ao criar usuário:", error);
-      });
+  const handleUserCreated = (newUser) => {
+    setUsuarios((prev) => [...prev, newUser]); // Adiciona o novo usuário à lista
   };
 
   if (loading) return <div>Carregando...</div>;
 
   return (
-    <div>
-      <div className="main-content">
-        {/* Modal de Criação de Usuário */}
-        {showModal && (
-          <div className="modal">
-            <div className="modal-content">
-              <span className="close" onClick={() => setShowModal(false)}>&times;</span>
-              <h3>Criar Usuário</h3>
-              <div className="form-group">
-                <label htmlFor="username">Nome:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={newUser.username}
-                  onChange={e => setNewUser({ ...newUser, username: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="password">Senha:</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  value={newUser.password}
-                  onChange={e => setNewUser({ ...newUser, password: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="empresa">Empresa:</label>
-                <select
-                  className="form-control"
-                  value={newUser.empresa}
-                  onChange={e => setNewUser({ ...newUser, empresa: e.target.value })}
-                >
-                  <option value="">Selecione uma empresa</option>
-                  {empresas.map((empresa) => (
-                    <option key={empresa.id} value={empresa.id}>
-                      {empresa.nome} {/* Supondo que o campo que contém o nome da empresa seja 'nome' */}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <button className="btn btn-success" onClick={createUser}>
-                Criar Usuário
-              </button>
-            </div>
-          </div>
-        )}
+    <div className="container mt-4">
+      {/* Modal para criação de usuário */}
+      <UserModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onUserCreated={handleUserCreated}
+      />
 
-        {/* Tabela de usuários */}
-        <div className="row">
-          <div className="col">
-            <div className="card shadow">
-              <div className="card-header border-0">
-                <h3 className="mb-0">Painel Gerencial - Usuários</h3>
-                <div className='mb-2'>
-                  <button className="btn btn-primary button-right" onClick={() => setShowModal(true)}>
-                    Criar Usuário
-                  </button>
-                </div>
-              </div>
-              <div className="table-responsive">
-                <table className="table align-items-center table-flush">
-                  <thead className="thead-light">
-                    <tr>
-                      <th scope="col">ID</th>
-                      <th scope="col">Nome</th>
-                      <th scope="col">Empresa</th>
-                      <th scope="col">Options</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {usuarios.map((usuario, index) => (
-                      <tr key={index}>
-                        <td>{usuario.id}</td>
-                        <td>{usuario.username}</td>
-                        <td>{usuario.empresas.nome}</td>
-                        <td><button className="btn btn-primary">Editar</button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="card-footer py-4">
-                <nav aria-label="...">
-                  <ul className="pagination justify-content-end mb-0">
-                    <li className="page-item disabled">
-                      <a className="page-link" href="#" tabIndex="-1">
-                        <i className="fas fa-angle-left"></i>
-                        <span className="sr-only">Previous</span>
-                      </a>
-                    </li>
-                    <li className="page-item active">
-                      <a className="page-link" href="#">1</a>
-                    </li>
-                    <li className="page-item">
-                      <a className="page-link" href="#">2 <span className="sr-only">(current)</span></a>
-                    </li>
-                    <li className="page-item">
-                      <a className="page-link" href="#">3</a>
-                    </li>
-                    <li className="page-item">
-                      <a className="page-link" href="#">
-                        <i className="fas fa-angle-right"></i>
-                        <span className="sr-only">Next</span>
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
-              </div>
-            </div>
-          </div>
+      <Row className="mb-4">
+        <Col>
+          <h3>Painel Gerencial - Usuários</h3>
+        </Col>
+        <Col className="text-right">
+          {/* Botão para abrir o modal */}
+          <Button variant="primary" onClick={() => setShowModal(true)}>
+            Criar Usuário
+          </Button>
+        </Col>
+      </Row>
+
+      <Card className="shadow">
+        <Card.Header>
+          <h4 className="mb-0">Lista de Usuários</h4>
+        </Card.Header>
+        <div className="table-responsive">
+          <Table hover bordered>
+            <thead className="thead-light">
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Empresa</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usuarios.length > 0 ? (
+                usuarios.map((usuario, index) => (
+                  <tr key={index}>
+                    <td>{usuario.id}</td>
+                    <td>{usuario.username}</td>
+                    <td>{usuario.empresas?.nome || 'Não informado'}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3">Nenhum usuário encontrado.</td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

@@ -32,9 +32,15 @@ const getToken = () => {
   return localStorage.getItem('token');
 };
 
+const isAuthenticated = () => {
+  const token = getToken();
+  return !!token; // Retorna true se o token estiver presente, caso contrário, false
+};
+
 const authService = {
   login,
   getToken,
+  isAuthenticated,
 };
 
 export default authService;

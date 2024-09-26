@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import apiService from '../services/apiService'; // Importando a apiService
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import apiService from '../services/apiService'
+import { Bar } from 'react-chartjs-2';
+import 'bootstrap/dist/css/bootstrap.min.css'; // Importa o CSS do Bootstrap
 
 const Graph = ({ setCurrentPage, setSelectedOperation }) => {
   const [data, setData] = useState([]);
 
   const fetchTickets = () => {
-    apiService.getTickets() // Usando a apiService para buscar tickets
+    apiService.getTickets() 
       .then(response => {
         const tickets = response.data;
         const aggregatedData = aggregateData(tickets);
@@ -27,46 +28,51 @@ const Graph = ({ setCurrentPage, setSelectedOperation }) => {
       if (!result[operacaoNome]) {
         result[operacaoNome] = 0;
       }
-      result[operacaoNome] += pesoLiquido; // Soma o peso líquido para cada operação
+      result[operacaoNome] += pesoLiquido;
     });
 
-    // Converte o resultado em um array para o gráfico
-    return Object.entries(result).map(([nome, total]) => ({
-      nome,
-      total
-    }));
+    return {
+      labels: Object.keys(result), // Nomes das operações
+      datasets: [{
+        label: 'Peso Líquido',
+        data: Object.values(result), // Totais por operação
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      }],
+    };
   };
 
   useEffect(() => {
     fetchTickets();
   }, []);
 
-  const handleBarDoubleClick = (data) => {
-    setSelectedOperation(data); // Armazena os dados da operação selecionada
-    setCurrentPage('operationDetails'); // Muda para a página de detalhes
-  };
-  
   return (
-    <div>
-      <h2 align="center">Relatório de Saídas</h2>
-      <BarChart
-        width={600}
-        height={300}
-        data={data}
-        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="nome" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar 
-          dataKey="total"
-          fill="#8884d8" 
-          onClick={handleBarDoubleClick}
-          onDoubleClick={handleBarDoubleClick} 
-        />
-      </BarChart>
+    <div className="container mt-5">
+      <h2 className="text-center">Relatório de Saídas</h2>
+      <div className="row">
+        <div className="col-md-8 offset-md-2">
+          <Bar
+            data={data}
+            options={{
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              },
+              plugins: {
+                legend: {
+                  position: 'top',
+                },
+                title: {
+                  display: true,
+                  text: 'Total de Peso Líquido por Operação'
+                }
+              }
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

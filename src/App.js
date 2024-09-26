@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navigation from './components/Navigation';
-import TicketsViewAPI from './views/TicketsList';
+import TicketsViewAPI from './views/TicketsViewAPI';
 import TicketsForm from './views/TicketsForm';
 import TicketPrint from './views/TicketPrint';
 import ImpressaoTickets from './views/ImpressaoTickets';

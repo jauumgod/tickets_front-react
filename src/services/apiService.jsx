@@ -5,9 +5,9 @@ import authService from './authService';
 
 const API_URL = 'http://127.0.0.1:8000/api'; // Base URL da API
 
-// Função para buscar tickets com filtros opcionais
-const getTickets = (operacao = '', sequencia = '', criacao = '') => {
-  let url = `${API_URL}/tickets/`;
+// Função para buscar tickets com filtros opcionais e paginação
+const getTickets = (operacao = '', sequencia = '', criacao = '', page = 1, limit = 5) => {
+  let url = `${API_URL}/tickets/?page=${page}&limit=${limit}`;
   const params = [];
 
   if (operacao) params.push(`operacao=${operacao}`);
@@ -15,7 +15,7 @@ const getTickets = (operacao = '', sequencia = '', criacao = '') => {
   if (criacao) params.push(`criacao=${criacao}`);
 
   if (params.length > 0) {
-    url += '?' + params.join('&');
+    url += '&' + params.join('&');
   }
 
   const token = authService.getToken();
@@ -46,7 +46,7 @@ const getTicketById = (ticketId) => {
 
 // Função para buscar usuários
 const getUsers = () => {
-  const url = `${API_URL}/users/`; // Altere a URL de acordo com a sua API
+  const url = `${API_URL}/users/`;
 
   const token = authService.getToken();
   if (!token) {
@@ -62,7 +62,7 @@ const getUsers = () => {
 
 // Função para buscar empresas
 const getEmpresas = () => {
-  const url = `${API_URL}/empresas/`; // Altere a URL de acordo com a sua API
+  const url = `${API_URL}/empresas/`;
 
   const token = authService.getToken();
   if (!token) {
@@ -78,9 +78,9 @@ const getEmpresas = () => {
 
 const apiService = {
   getTickets,
-  getTicketById, // Adiciona a função para buscar ticket por ID
+  getTicketById,
   getUsers,
-  getEmpresas, // Adiciona a função para buscar empresas
+  getEmpresas,
 };
 
 export default apiService;

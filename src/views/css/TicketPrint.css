@@ -54,13 +54,21 @@
 
  
   
-.assinatura{
+.assinatura {
   display: flex;
-  justify-content: center;
+  justify-content: space-around; /* Alinha as assinaturas dentro do container */
+  flex-wrap: wrap; /* Permite que os itens "quebrem" para a próxima linha, se necessário */
   margin-top: 20px;
 }
 
 .assinatura-item {
-  margin: 0 20px;
+  flex-basis: 45%; /* Cada item de assinatura ocupará até 45% do container */
+  margin: 10px; /* Espaçamento entre os itens */
   text-align: center;
+}
+
+.assinatura-item span {
+  display: block;
+  margin-top: 10px; /* Espaçamento entre o rótulo e a linha de assinatura */
+  overflow-x: hidden; /* Evita que o conteúdo transborde */
 }
